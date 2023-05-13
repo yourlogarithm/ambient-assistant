@@ -8,7 +8,8 @@ class CameraUtils {
   static Future<void> takePhoto() async {
     try {
       final file = await cameraController.takePicture();
-      filename = file.name;
+      filename = file.path;
+      debugPrint(filename);
     } on CameraException catch (e) {
       debugPrint("camera error $e");
     }

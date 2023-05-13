@@ -10,6 +10,10 @@ class PlaybackUtils {
   static bool isPlaying = false;
 
   static void playAudio(Uint8List bytes, VoidCallback? whenFinished) async {
+    if (!isPlayerInitialized) {
+      await _mPlayer.openPlayer();
+      isPlayerInitialized = true;
+    }
     await _mPlayer.startPlayer(
         fromDataBuffer: bytes,
         codec: RecordUtils.codec,

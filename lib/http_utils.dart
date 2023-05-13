@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class HttpUtils {
-  static String hostname = "http://192.168.109.123:80/";
+  static String hostname = "http://192.168.159.123:80/";
 
   static Future<http.Response> postRequest(Map<String, String> body, String endpoint) {
     return http.post(
@@ -35,14 +36,12 @@ class HttpUtils {
   }
 
   static Future<dynamic> generateResponse(String transcript) async {
-    var request = http.Request('GET', Uri.parse('${hostname}chat/generate_response/?message=$transcript'));
-    http.StreamedResponse response = await request.send();
-    if (response.statusCode == 200) {
-      return await response.stream.bytesToString();
-    }
-    else {
-      print(response.reasonPhrase);
-    }
+    final response = await http.get(Uri.parse('${hostname}chat/generate_response/?message=$transcript'));
+    return response.bodyBytes;
+  }
 
+  static void deleteChat() async {
+    final response = await http.delete(Uri.parse('${hostname}chat/reset'));
+    debugPrint(response.statusCode.toString());
   }
 }
