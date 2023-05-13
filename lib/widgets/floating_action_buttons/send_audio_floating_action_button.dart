@@ -1,3 +1,6 @@
+import 'package:ambient_assistant/file_provider_utils.dart';
+import 'package:ambient_assistant/http_utils.dart';
+import 'package:ambient_assistant/record_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'my_floating_action_button.dart';
@@ -16,5 +19,6 @@ class SendAudioFloatingActionButtonState extends MyFloatingActionButtonState {
 
   @override
   void onPressed() {
+    HttpUtils.postFile('speech-to-text', FileProviderUtils.cacheDir + RecordUtils.filename);
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:ambient_assistant/widgets/record_utils.dart';
+import 'package:ambient_assistant/record_utils.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
 class PlaybackUtils {

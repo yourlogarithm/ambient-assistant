@@ -1,7 +1,7 @@
 import 'package:ambient_assistant/widgets/floating_action_buttons/my_floating_action_button.dart';
 import 'package:flutter/material.dart';
 
-import '../record_utils.dart';
+import '../../record_utils.dart';
 
 class RecordAudioFloatingActionButton extends MyFloatingActionButton {
   const RecordAudioFloatingActionButton({super.key});

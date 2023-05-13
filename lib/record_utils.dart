@@ -14,6 +14,7 @@ class RecordUtils {
   static bool isRecording = false;
   static int pos = 0;
   static double dbLevel = 0;
+  static late String filename;
 
   static Future<void> init() async {
     await openTheRecorder();
@@ -75,7 +76,7 @@ class RecordUtils {
     if (!isRecorderInited) {
       await init();
     }
-    final filename = getFilename();
+    filename = getFilename();
     await _mRecorder.startRecorder(codec: codec, toFile: filename);
     isRecording = true;
     return filename;
