@@ -1,4 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:ambient_assistant/camera_utils.dart';
+import 'package:ambient_assistant/file_provider_utils.dart';
+import 'package:ambient_assistant/http_utils.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -15,7 +20,7 @@ class AudioRecoderWidget extends StatefulWidget {
 class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
   final FlutterSoundRecorder _mRecorder = FlutterSoundRecorder();
   Codec _codec = Codec.aacMP4;
-  String _mPath = 'tau_file.mp4';
+  String _extension = '.mp4';
   bool _mRecorderIsInited = false;
   double _mSubscriptionDuration = 0;
   StreamSubscription? _recorderSubscription;
@@ -23,6 +28,7 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
   double dbLevel = 0;
   bool _mPlayerIsInited = false;
   FlutterSoundPlayer _mPlayer = FlutterSoundPlayer();
+  late String filename;
 
   @override
   void initState() {
@@ -65,8 +71,8 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
     }
     await _mRecorder.openRecorder();
     if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
-      _codec = Codec.aacMP4;
-      _mPath = 'tau_file.mp4';
+      _codec = Codec.opusWebM;
+      _extension = '.webm';
       if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
         _mRecorderIsInited = true;
         return;
@@ -109,14 +115,22 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
 
   // Record Audio
 
-  void record(FlutterSoundRecorder? recorder) async {
-    await recorder!.startRecorder(codec: _codec, toFile: _mPath);
+  String getFilename() {
+    return DateTime.timestamp().toString() + _extension;
+  }
+
+  Future<void> record(FlutterSoundRecorder? recorder) async {
+    filename = getFilename();
+    await recorder!.startRecorder(codec: _codec, toFile: filename);
     setState(() {});
   }
 
   Future<void> stopRecorder(FlutterSoundRecorder recorder) async {
     await recorder.stopRecorder();
-    play("/data/user/0/com.example.ambient_assistant/cache/$_mPath");
+    Uint8List audioFileBytes = await File(FileProviderUtils.cacheDir + filename).readAsBytes();
+    Uint8List imageFileBytes = await File(FileProviderUtils.cacheDir + CameraUtils.filename).readAsBytes();
+    HttpUtils.postBinaryRequest(audioFileBytes, '/speech-to-text').then((value) => print('Speech-to-text: $value'));
+    HttpUtils.postBinaryRequest(imageFileBytes, '/image/label').then((value) => print('Image-label: $value'));
   }
 
   Future<void> setSubscriptionDuration(double d) async {
@@ -129,14 +143,17 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
 
   VoidCallback uiRecordAudio(FlutterSoundRecorder? recorder) {
     if (!_mRecorderIsInited) {return () {};}
-    return recorder!.isStopped ? () { record(recorder); } : () {stopRecorder(recorder).then((value) => setState(() {}));
+    return recorder!.isStopped ? () {record(recorder);} : () {
+      stopRecorder(recorder).then((value) {
+        setState(() {});});
+
     };
   }
 
   // Play audio
 
   void play(String uri) async {
-    await _mPlayer!.startPlayer(
+    await _mPlayer.startPlayer(
         fromURI: uri,
         codec: Codec.aacMP4,
         whenFinished: () { setState(() {}); });
@@ -144,9 +161,7 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
   }
 
   Future<void> stopPlayer() async {
-    if (_mPlayer != null) {
-      await _mPlayer!.stopPlayer();
-    }
+    await _mPlayer.stopPlayer();
   }
 
   @override

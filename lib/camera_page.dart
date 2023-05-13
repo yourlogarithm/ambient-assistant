@@ -2,6 +2,8 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:ambient_assistant/audio_recorder_widget.dart';
 
+import 'camera_utils.dart';
+
 class CameraPage extends StatefulWidget {
   const CameraPage({Key? key, required this.cameras}) : super(key: key);
 
@@ -59,7 +61,7 @@ class _CameraPageState extends State<CameraPage> {
                       color: Colors.red,
                       child: IconButton(
                           onPressed: () {
-                            _cameraController.takePicture().then((value) => print(value.path));
+                            _cameraController.takePicture().then((value) => CameraUtils.filename = value.name);
                           },
                           color: Colors.white,
                           icon: const Icon(Icons.camera_alt_outlined)

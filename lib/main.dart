@@ -1,4 +1,3 @@
-import 'package:ambient_assistant/home_page.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
