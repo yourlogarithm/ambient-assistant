@@ -7,8 +7,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class RecordUtils {
   static final FlutterSoundRecorder _mRecorder = FlutterSoundRecorder();
-  static Codec codec = Codec.opusWebM;
-  static String _extension = 'webm';
+  static Codec codec = Codec.aacMP4;
+  static String _extension = '.mp4';
   static StreamSubscription? _recorderSubscription;
   static bool isRecorderInited = false;
   static bool isRecording = false;
