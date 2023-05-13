@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../http_utils.dart';
 import 'my_floating_action_button.dart';
 
 class SendAudioAndPhotoFloatingActionButton extends MyFloatingActionButton {
@@ -16,5 +17,6 @@ class SendAudioAndPhotoFloatingActionButtonState extends MyFloatingActionButtonS
 
   @override
   void onPressed() {
+    HttpUtils.postFile('image/label',  "");
   }
 }

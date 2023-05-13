@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 
 class HttpUtils {
   static String hostname = "http://192.168.109.123:80/";
@@ -16,14 +14,13 @@ class HttpUtils {
     );
   }
 
-  static void postFile(String endpoint, String filename) async {
+  static dynamic postFile(String endpoint, String filename) async {
     var request = http.MultipartRequest('POST', Uri.parse(hostname + endpoint));
     request.files.add(await http.MultipartFile.fromPath('file', filename));
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-    }
-    else {
+      return await response.stream.bytesToString();
+    } else {
       print(response.reasonPhrase);
     }
   }
