@@ -1,9 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,7 +13,6 @@ class AudioRecoderWidget extends StatefulWidget {
 }
 
 class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
-
   final FlutterSoundRecorder _mRecorder = FlutterSoundRecorder();
   Codec _codec = Codec.aacMP4;
   String _mPath = 'tau_file.mp4';
@@ -26,7 +22,7 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
   int pos = 0;
   double dbLevel = 0;
   bool _mPlayerIsInited = false;
-  FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
+  FlutterSoundPlayer _mPlayer = FlutterSoundPlayer();
 
   @override
   void initState() {
@@ -49,8 +45,7 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
     cancelRecorderSubscriptions();
     _mRecorder.closeRecorder();
     stopPlayer();
-    _mPlayer!.closePlayer();
-    _mPlayer = null;
+    _mPlayer.closePlayer();
     super.dispose();
   }
 
@@ -110,11 +105,6 @@ class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
         }
       });
     });
-  }
-
-  Future<Uint8List> getAssetData(String path) async {
-    var asset = await rootBundle.load(path);
-    return asset.buffer.asUint8List();
   }
 
   // Record Audio

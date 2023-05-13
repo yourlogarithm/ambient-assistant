@@ -1,6 +1,5 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/services/system_chrome.dart';
 import 'package:ambient_assistant/audio_recorder_widget.dart';
 
 class CameraPage extends StatefulWidget {
@@ -20,7 +19,6 @@ class _CameraPageState extends State<CameraPage> {
     try {
       await _cameraController.initialize().then((_) {
         if (!mounted) return;
-        _cameraController.lockCaptureOrientation(DeviceOrientation.landscapeLeft);
         setState(() {});
       });
     } on CameraException catch (e) {
@@ -49,7 +47,10 @@ class _CameraPageState extends State<CameraPage> {
           child: _cameraController.value.isInitialized ?
           Column(
               children: [
-                CameraPreview(_cameraController),
+                SizedBox(
+                    height: 150,
+                    child: CameraPreview(_cameraController)
+                ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
