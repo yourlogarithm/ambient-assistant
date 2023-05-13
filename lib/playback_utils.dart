@@ -1,22 +1,23 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:ambient_assistant/record_utils.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
 class PlaybackUtils {
-  final FlutterSoundPlayer _mPlayer = FlutterSoundPlayer();
-  bool isPlayerInitialized = false;
-  bool isPlaying = false;
+  static final FlutterSoundPlayer _mPlayer = FlutterSoundPlayer();
+  static bool isPlayerInitialized = false;
+  static bool isPlaying = false;
 
-  void playAudio(String uri, VoidCallback? whenFinished) async {
+  static void playAudio(Uint8List bytes, VoidCallback? whenFinished) async {
     await _mPlayer.startPlayer(
-        fromURI: uri,
+        fromDataBuffer: bytes,
         codec: RecordUtils.codec,
         whenFinished: whenFinished ?? () {}
     );
   }
 
-  Future<void> stopAudio() async {
+  static Future<void> stopAudio() async {
     await _mPlayer.stopPlayer();
   }
 }

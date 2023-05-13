@@ -1,6 +1,11 @@
+import 'dart:typed_data';
+
+import 'package:ambient_assistant/playback_utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../file_provider_utils.dart';
 import '../../http_utils.dart';
+import '../../record_utils.dart';
 import 'my_floating_action_button.dart';
 
 class SendAudioAndPhotoFloatingActionButton extends MyFloatingActionButton {
@@ -15,8 +20,16 @@ class SendAudioAndPhotoFloatingActionButton extends MyFloatingActionButton {
 class SendAudioAndPhotoFloatingActionButtonState extends MyFloatingActionButtonState {
   IconData icon = Icons.send_time_extension_outlined;
 
+  void execute() async {
+    HttpUtils.getRequest('chat/reset');
+    final label = (await HttpUtils.postFile('image/label',  "")) as String;
+    final transcript = (await HttpUtils.postFile('speech-to-text', FileProviderUtils.cacheDir + RecordUtils.filename));
+    final message = 'I have a $label and $transcript';
+    final audioMesssage = (await HttpUtils.generateResponse(message)) as Uint8List;
+    PlaybackUtils.playAudio(audioMesssage, null);
+}
+
   @override
   void onPressed() {
-    HttpUtils.postFile('image/label',  "");
   }
 }

@@ -1,3 +1,4 @@
+import 'package:ambient_assistant/camera_utils.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -9,13 +10,11 @@ class CameraWidget extends StatefulWidget {
 }
 
 class _CameraWidgetState extends State<CameraWidget> {
-  late CameraController _cameraController;
-
   Future<void> initCamera() async {
     var cameras = await availableCameras();
-    _cameraController = CameraController(cameras[0], ResolutionPreset.high);
+    CameraUtils.cameraController = CameraController(cameras[0], ResolutionPreset.high);
     try {
-      await _cameraController.initialize().then((_) {
+      await CameraUtils.cameraController.initialize().then((_) {
         if (!mounted) return;
         setState(() {});
       });
@@ -32,7 +31,7 @@ class _CameraWidgetState extends State<CameraWidget> {
 
   @override
   void dispose() {
-    _cameraController.dispose();
+    CameraUtils.cameraController.dispose();
     super.dispose();
   }
 
@@ -41,11 +40,11 @@ class _CameraWidgetState extends State<CameraWidget> {
   );
 
   Widget cameraPreview() {
-    return CameraPreview(_cameraController);
+    return CameraPreview(CameraUtils.cameraController);
   }
 
   @override
   Widget build(BuildContext context) {
-    return _cameraController.value.isInitialized ? cameraPreview() : loadingIndicator;
+    return CameraUtils.cameraController.value.isInitialized ? cameraPreview() : loadingIndicator;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:ambient_assistant/camera_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'my_floating_action_button.dart';
@@ -16,5 +17,6 @@ class ShootPhotoFloatingActionButtonState extends MyFloatingActionButtonState {
 
   @override
   void onPressed() {
+    CameraUtils.takePhoto();
   }
 }
