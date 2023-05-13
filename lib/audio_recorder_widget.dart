@@ -8,14 +8,14 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class AudioRecoder extends StatefulWidget {
-  const AudioRecoder({Key? key}) : super(key: key);
+class AudioRecoderWidget extends StatefulWidget {
+  const AudioRecoderWidget({Key? key}) : super(key: key);
 
   @override
-  State<AudioRecoder> createState() => _AudioRecoderState();
+  State<AudioRecoderWidget> createState() => _AudioRecoderWidgetState();
 }
 
-class _AudioRecoderState extends State<AudioRecoder> {
+class _AudioRecoderWidgetState extends State<AudioRecoderWidget> {
 
   final FlutterSoundRecorder _mRecorder = FlutterSoundRecorder();
   Codec _codec = Codec.aacMP4;
@@ -25,6 +25,8 @@ class _AudioRecoderState extends State<AudioRecoder> {
   StreamSubscription? _recorderSubscription;
   int pos = 0;
   double dbLevel = 0;
+  bool _mPlayerIsInited = false;
+  FlutterSoundPlayer? _mPlayer = FlutterSoundPlayer();
 
   @override
   void initState() {
@@ -34,16 +36,21 @@ class _AudioRecoderState extends State<AudioRecoder> {
         _mRecorderIsInited = true;
       });
     });
+    _mPlayer!.openPlayer().then((value) {
+      setState(() {
+        _mPlayerIsInited = true;
+      });
+    });
   }
 
   @override
   void dispose() {
     stopRecorder(_mRecorder);
     cancelRecorderSubscriptions();
-
-    // Be careful : you must `close` the audio session when you have finished with it.
     _mRecorder.closeRecorder();
-
+    stopPlayer();
+    _mPlayer!.closePlayer();
+    _mPlayer = null;
     super.dispose();
   }
 
@@ -63,8 +70,8 @@ class _AudioRecoderState extends State<AudioRecoder> {
     }
     await _mRecorder.openRecorder();
     if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
-      _codec = Codec.opusWebM;
-      _mPath = 'tau_file.webm';
+      _codec = Codec.aacMP4;
+      _mPath = 'tau_file.mp4';
       if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
         _mRecorderIsInited = true;
         return;
@@ -110,7 +117,7 @@ class _AudioRecoderState extends State<AudioRecoder> {
     return asset.buffer.asUint8List();
   }
 
-  // -------  Here is the code to playback  -----------------------
+  // Record Audio
 
   void record(FlutterSoundRecorder? recorder) async {
     await recorder!.startRecorder(codec: _codec, toFile: _mPath);
@@ -119,6 +126,7 @@ class _AudioRecoderState extends State<AudioRecoder> {
 
   Future<void> stopRecorder(FlutterSoundRecorder recorder) async {
     await recorder.stopRecorder();
+    play("/data/user/0/com.example.ambient_assistant/cache/$_mPath");
   }
 
   Future<void> setSubscriptionDuration(double d) async {
@@ -129,12 +137,26 @@ class _AudioRecoderState extends State<AudioRecoder> {
     );
   }
 
-  // --------------------- UI -------------------
-
-  Null Function() getPlaybackFn(FlutterSoundRecorder? recorder) {
+  VoidCallback uiRecordAudio(FlutterSoundRecorder? recorder) {
     if (!_mRecorderIsInited) {return () {};}
     return recorder!.isStopped ? () { record(recorder); } : () {stopRecorder(recorder).then((value) => setState(() {}));
     };
+  }
+
+  // Play audio
+
+  void play(String uri) async {
+    await _mPlayer!.startPlayer(
+        fromURI: uri,
+        codec: Codec.aacMP4,
+        whenFinished: () { setState(() {}); });
+    setState(() {});
+  }
+
+  Future<void> stopPlayer() async {
+    if (_mPlayer != null) {
+      await _mPlayer!.stopPlayer();
+    }
   }
 
   @override
@@ -142,8 +164,7 @@ class _AudioRecoderState extends State<AudioRecoder> {
     return Container(
       margin: const EdgeInsets.all(3),
       padding: const EdgeInsets.all(3),
-      height: 140,
-      width: double.infinity,
+      height: 200,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: const Color(0xFFFAF0E6),
@@ -152,30 +173,36 @@ class _AudioRecoderState extends State<AudioRecoder> {
           width: 3,
         ),
       ),
-      child: Column(children: [
-        Row(children: [
-          ElevatedButton(
-            onPressed: _mRecorderIsInited ? getPlaybackFn(_mRecorder) : () {},
-            child: Text(_mRecorder.isRecording ? 'Stop' : 'Record'),
+      child: Column(
+          children: [
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: _mRecorderIsInited ? uiRecordAudio(_mRecorder) : () {},
+                  child: Text(_mRecorder.isRecording ? 'Stop' : 'Record'),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
+                Text(_mRecorder.isRecording ? '' : 'Stopped'),
+                const SizedBox(
+                  width: 20,
+                ),
+                Text('Pos: $pos  dbLevel: ${((dbLevel * 100.0).floor()) / 100}'),
+              ]
+            ),
+          Text('Player is inited: $_mPlayerIsInited'),
+          Text('Player is playing: ${_mPlayer != null ? _mPlayer!.isPlaying : false}'),
+          const Text('Subscription Duration:'),
+          Slider(
+            value: _mSubscriptionDuration,
+            min: 0.0,
+            max: 2000.0,
+            onChanged: setSubscriptionDuration,
+            //divisions: 100
           ),
-          const SizedBox(
-            width: 10,
-          ),
-          Text(_mRecorder.isRecording ? '' : 'Stopped'),
-          const SizedBox(
-            width: 20,
-          ),
-          Text('Pos: $pos  dbLevel: ${((dbLevel * 100.0).floor()) / 100}'),
-        ]),
-        const Text('Subscription Duration:'),
-        Slider(
-          value: _mSubscriptionDuration,
-          min: 0.0,
-          max: 2000.0,
-          onChanged: setSubscriptionDuration,
-          //divisions: 100
-        ),
-      ]),
+        ]
+      ),
     );
   }
 }

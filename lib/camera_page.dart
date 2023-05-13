@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/services/system_chrome.dart';
+import 'package:ambient_assistant/audio_recorder_widget.dart';
 
 class CameraPage extends StatefulWidget {
   const CameraPage({Key? key, required this.cameras}) : super(key: key);
@@ -49,13 +50,19 @@ class _CameraPageState extends State<CameraPage> {
           Column(
               children: [
                 CameraPreview(_cameraController),
-                Row(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    IconButton(
-                        onPressed: () {
-                          _cameraController.takePicture().then((value) => print(value.path));
-                        },
-                        icon: const Icon(Icons.camera_alt_outlined)
+                    const AudioRecoderWidget(),
+                    Material(
+                      color: Colors.red,
+                      child: IconButton(
+                          onPressed: () {
+                            _cameraController.takePicture().then((value) => print(value.path));
+                          },
+                          color: Colors.white,
+                          icon: const Icon(Icons.camera_alt_outlined)
+                      ),
                     )
                   ],
                 ),
